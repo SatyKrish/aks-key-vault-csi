@@ -1,0 +1,99 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1alpha1
+kind: SecretProviderClass
+metadata:
+  name: aks-helloworld
+spec:
+  provider: azure
+  secretObjects:                               
+  - secretName: aks-ingress-tls
+    type: kubernetes.io/tls
+    data: 
+    - objectName: aks-ingress-tls-crt
+      key: tls.key
+    - objectName: aks-ingress-tls-crt
+      key: tls.crt
+  parameters:
+    usePodIdentity: "false"                                        
+    useVMManagedIdentity: "true"                                   
+    userAssignedIdentityID: "f1557a49-7089-45e7-86ee-3d1cb3cf7664"  
+    keyvaultName: "aksdevvault"                                     
+    cloudName: ""                                  
+    objects:  |
+      array:
+        - |
+          objectName: aks-ingress-tls-crt
+          objectType: secret
+    tenantId: "14485795-c84c-451a-bb0a-1610c5b5f017"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aks-helloworld
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aks-helloworld
+  template:
+    metadata:
+      labels:
+        app: aks-helloworld
+    spec:
+      containers:
+      - name: aks-helloworld
+        image: neilpeterson/aks-helloworld:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: TITLE
+          value: "Welcome to Azure Kubernetes Service (AKS)"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: aks-helloworld
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+      - name: aks-helloworld
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "aks-helloworld"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aks-helloworld
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+  selector:
+    app: aks-helloworld
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: aks-helloworld
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+spec:
+  tls:
+  - hosts:
+    - aksdevcluster.51aec8f1ce5c4e2fab6e.southeastasia.aksapp.io
+    secretName: aks-ingress-tls
+  rules:
+  - host: aksdevcluster.51aec8f1ce5c4e2fab6e.southeastasia.aksapp.io
+    http:
+      paths:
+      - backend:
+          serviceName: aks-helloworld
+          servicePort: 80
+        path: /(.*)
