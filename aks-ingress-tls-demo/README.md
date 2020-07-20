@@ -94,7 +94,7 @@ kubectl create secret generic secrets-store-creds --from-literal clientid=$CLIEN
 
 ### Update SecretProviderClass with secret store configuration
 
-Update [this sample deployment](aks-ingress-tls-sample.yaml) to configure `SecretProviderClass` resource to provide Azure-specific parameters for the Secrets Store CSI driver.
+Update [this sample deployment](aks-helloworld.yaml) to configure `SecretProviderClass` resource to provide Azure-specific parameters for the Secrets Store CSI driver.
 
 ```yml
 apiVersion: secrets-store.csi.x-k8s.io/v1alpha1
