@@ -24,4 +24,4 @@ Following providers are currently supported:
 
 ## Retrieve TLS certificate for Ingress from Azure Key Vault
 
-Refer [AKS Ingress TLS](/aks-ingress-tls/README.md) sample
+Refer [AKS Ingress TLS](/aks-ingress-tls-demo/README.md) sample
