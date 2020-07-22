@@ -8,7 +8,7 @@ The Secrets Store CSI driver secrets-store.csi.k8s.io allows Kubernetes to mount
 
 The diagram below illustrates how Secrets Store CSI Volume works.
 
-![Kubernetes Secret Store CSI](./img/k8s-secretstore-csi.png)
+![Kubernetes Secret Store CSI](./csi-diagram.png)
 
 # Providers
 
